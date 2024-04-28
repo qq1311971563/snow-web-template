@@ -1,24 +1,13 @@
-import request from '@/utils/request'
+import { post } from '@/snow-framework/Request'
 
 export function login(data) {
-  return request({
-    url: '/vue-element-admin/user/login',
-    method: 'post',
-    data
-  })
+  return post('/auth/login', data)
 }
 
-export function getInfo(token) {
-  return request({
-    url: '/vue-element-admin/user/info',
-    method: 'get',
-    params: { token }
-  })
+export function getInfo() {
+  return post('/auth/get-userinfo')
 }
 
 export function logout() {
-  return request({
-    url: '/vue-element-admin/user/logout',
-    method: 'post'
-  })
+  return post('/auth/logout')
 }

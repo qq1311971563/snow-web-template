@@ -1,18 +1,28 @@
 import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import router, { resetRouter } from '@/router'
+import router, { asyncRoutes, constantRoutes, resetRouter } from '@/router'
+import appConfig from '@/snow-framework/AppConfig'
+import { filterAsyncRoutes } from '@/store/modules/permission'
 
 const state = {
-  token: getToken(),
+  token: appConfig.getToken(),
+  loginUser: appConfig.getLoginUser(),
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  systemAdmin: false,
+  roles: [],
+  routers: [],
+  dynamicRouters: []
 }
 
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
+    appConfig.setToken(token)
+  },
+  SET_LOGIN_USER: (state, userInfo) => {
+    state.loginUser = userInfo
+    appConfig.setLoginUser(userInfo)
   },
   SET_INTRODUCTION: (state, introduction) => {
     state.introduction = introduction
@@ -25,69 +35,65 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_ROUTERS(state, routers) {
+    resetRouter()
+    router.addRoutes(routers)
+    state.dynamicRouters = routers
+    state.routers = constantRoutes.concat(routers)
   }
 }
 
 const actions = {
   // user login
-  login({ commit }, userInfo) {
+  async login({ commit }, userInfo) {
     const { username, password } = userInfo
-    return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
-    })
+    const loginResult = await login({ account: username.trim(), password: password })
+    if (!loginResult.success) {
+      throw new Error(loginResult.message)
+    }
+    commit('SET_TOKEN', loginResult.data)
+    const userInfoResult = await getInfo()
+    if (!userInfoResult.success) {
+      commit('SET_TOKEN', '')
+      throw new Error(userInfoResult.message)
+    }
+    const loginUser = userInfoResult.data
+    commit('SET_LOGIN_USER', loginUser)
+    commit('SET_NAME', loginUser.name)
+    commit('SET_AVATAR', loginUser.avatar)
+    commit('SET_INTRODUCTION', '用户描述')
+    let accessedRoutes
+    if (loginUser.systemAdmin) {
+      accessedRoutes = asyncRoutes
+    } else {
+      console.log('Are you ok?', loginUser.permissions)
+      accessedRoutes = filterAsyncRoutes(asyncRoutes, loginUser.permissions)
+    }
+    commit('SET_ROUTERS', accessedRoutes)
   },
-
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
-
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
-
-        const { roles, name, avatar, introduction } = data
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+  async generateRouters({ commit, state }) {
+    let accessedRoutes
+    if (state.loginUser.systemAdmin) {
+      accessedRoutes = asyncRoutes
+    } else {
+      accessedRoutes = filterAsyncRoutes(asyncRoutes, state.loginUser.permissions)
+    }
+    commit('SET_ROUTERS', accessedRoutes)
   },
 
   // user logout
   logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
       logout(state.token).then(() => {
+        commit('SET_LOGIN_USER', null)
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
-        removeToken()
+        commit('SET_NAME', '')
+        commit('SET_ROUTERS', [])
         resetRouter()
-
-        // reset visited views and cached views
-        // to fixed https://github.com/PanJiaChen/vue-element-admin/issues/2485
         dispatch('tagsView/delAllViews', null, { root: true })
-
         resolve()
-      }).catch(error => {
-        reject(error)
       })
     })
   },
@@ -97,7 +103,6 @@ const actions = {
     return new Promise(resolve => {
       commit('SET_TOKEN', '')
       commit('SET_ROLES', [])
-      removeToken()
       resolve()
     })
   },
@@ -107,7 +112,6 @@ const actions = {
     const token = role + '-token'
 
     commit('SET_TOKEN', token)
-    setToken(token)
 
     const { roles } = await dispatch('getInfo')
 

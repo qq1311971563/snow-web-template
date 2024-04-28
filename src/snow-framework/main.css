@@ -1,0 +1,17 @@
+* {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+.view-container {
+  width: calc(100% - 8px);
+  margin: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  position: relative;
+  height: calc(100vh - 84px - 8px);
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+}
+.delete-button-color{
+  color: #F56C6C
+}

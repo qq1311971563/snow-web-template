@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { isExternal } from '@/utils/validate'
+import { isExternal } from '@/snow-framework/utils/validate'
 
 export default {
   props: {
