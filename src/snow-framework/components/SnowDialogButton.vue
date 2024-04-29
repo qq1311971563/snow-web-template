@@ -40,8 +40,7 @@ export default {
     },
     doConfirm: {
       type: Function,
-      default: () => {
-      }
+      default: () => true
     },
     disConfirm: {
       type: Boolean,

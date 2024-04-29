@@ -43,6 +43,14 @@ export default {
         return ''
       }
     },
+    createButtonText: {
+      type: String,
+      default: '新增'
+    },
+    createTitle: {
+      type: String,
+      default: '新增'
+    },
     queryApi: {
       type: [String, Function],
       default: () => {
@@ -143,7 +151,15 @@ export default {
 <template>
   <div class="view-container">
     <snow-search v-if="inited" :options="componentOptions" :query-fun="onSearch" />
-    <snow-create v-if="inited && createApi" ref="create" :options="componentOptions" :create-api=" typeof createApi === 'string' ? createApi : toCreate" @success="refresh" />
+    <snow-create
+      v-if="inited && createApi"
+      ref="create"
+      :options="componentOptions"
+      :create-api=" typeof createApi === 'string' ? createApi : toCreate"
+      :title="createTitle"
+      :button-text="createButtonText"
+      @success="refresh"
+    />
     <snow-update v-if="inited && updateApi" v-show="false" ref="update" :options="componentOptions" :update-api="updateApi" @success="refresh" />
     <div v-if="inited" class="content-div">
       <snow-table

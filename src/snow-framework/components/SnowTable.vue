@@ -60,6 +60,10 @@ export default {
     enableAction: {
       type: Boolean,
       default: false
+    },
+    minHeight: {
+      type: String,
+      default: '300px'
     }
   },
   data() {
@@ -102,17 +106,20 @@ export default {
       const result = await post(this.queryApi, reqParams)
       this.querying = false
       if (!result.success) {
+        this.$message.error(result.message)
         this.tableData = []
         this.pageInfo.page = 1
         this.pageInfo.total = 0
         this.pageInfo.totalPage = 0
         return
       }
-      this.tableData = result.data.list
-      this.pageInfo.page = result.data.page
-      this.pageInfo.size = result.data.size || this.pageInfo.size
-      this.pageInfo.total = result.data.total
-      this.pageInfo.totalPage = result.data.totalPage || result.data.total / result.data.size
+      this.tableData = this.page ? result.data.list : result.data
+      if (this.page) {
+        this.pageInfo.page = result.data.page
+        this.pageInfo.size = result.data.size || this.pageInfo.size
+        this.pageInfo.total = result.data.total
+        this.pageInfo.totalPage = result.data.totalPage || result.data.total / result.data.size
+      }
     },
     handleSizeChange(val) {
       this.pageInfo.size = val
@@ -162,6 +169,7 @@ export default {
       :data="tableData"
       :highlight-current-row="checked !== undefined"
       :highlight-selection-row="true"
+      :style="{minHeight: minHeight}"
       @selection-change="handleSelectionChange"
       @current-change="checkedRowChange"
     >
@@ -175,7 +183,7 @@ export default {
         :width="item.width"
         :align="item.align"
         :sortable="item.sortable"
-        :show-overflow-tooltip="item.showOverflowTooltip"
+        :show-overflow-tooltip="item.showOverflowTooltip === undefined ? true : item.showOverflowTooltip"
       >
         <template v-slot="{row}">
           <span v-if="item.type === 'date'">
@@ -184,11 +192,13 @@ export default {
           <span v-else-if="item.type === 'dict'">
             {{ dictFind(item, row) }}
           </span>
+          <slot v-else-if="item.type === 'slot'" :name="item.slot" />
           <span v-else>
             {{ row[item.prop] ? row[item.prop] : (row[item.prop] === 0 ? '0' : '\\') }}
           </span>
         </template>
       </el-table-column>
+      <slot />
       <el-table-column v-if="enableAction || deleteApi || updateFun" label="操作">
         <template v-slot="{row, $index}">
           <el-button v-if="updateFun" size="small" type="text" @click="toUpdate(row, $index)">更新</el-button>

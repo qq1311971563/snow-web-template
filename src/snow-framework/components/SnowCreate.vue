@@ -20,6 +20,14 @@ export default {
     cleanParams: {
       type: Boolean,
       default: true
+    },
+    buttonText: {
+      type: String,
+      default: '新增'
+    },
+    title: {
+      type: String,
+      default: '新增'
     }
   },
   data() {
@@ -104,7 +112,7 @@ export default {
 </script>
 
 <template>
-  <snow-dialog-button button-text="新增" button-type="primary" title="新增" button-icon="el-icon-plus" :plain="true" :do-confirm="toCreate">
+  <snow-dialog-button :button-text="buttonText" button-type="primary" :title="title" button-icon="el-icon-plus" :plain="true" :do-confirm="toCreate">
     <el-form v-if="inited" ref="form" :model="params" label-position="right" :label-width="'100px'" :rules="rules">
       <el-form-item
         v-for="(item, index) in componentOptions"

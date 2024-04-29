@@ -1,6 +1,5 @@
 <script>
 import { post } from '@/snow-framework/Request'
-import ElementUtils from '@/snow-framework/ElementUtils'
 
 export default {
   name: 'SnowButton',
@@ -31,11 +30,31 @@ export default {
     },
     confirmText: {
       type: String,
-      default: 'small'
+      default: '未定义'
     },
     params: {
       type: [Object, Number, String],
       default: null
+    },
+    prompt: {
+      type: Boolean,
+      default: false
+    },
+    inputPattern: {
+      type: RegExp,
+      default: null
+    },
+    inputErrorMessage: {
+      type: String,
+      default: ''
+    },
+    promptValueKey: {
+      type: String,
+      default: null
+    },
+    inputPlaceholder: {
+      type: String,
+      default: '请输入'
     }
   },
   data() {
@@ -51,17 +70,61 @@ export default {
         this.confirming = false
         return
       }
-      ElementUtils.confirm(this.confirmText, '提示', async(action, instance, done) => {
-        this.loading = true
-        const result = await post(this.api, this.params)
-        this.loading = false
-        if (result.success) {
-          this.$emit('success')
-          this.$message.success('操作成功')
-          return result.success
+      if (this.prompt) {
+        this.$prompt(this.confirmText, '提示', {
+          type: 'warning',
+          inputPlaceholder: this.inputPlaceholder,
+          beforeClose: async(action, instance, done) => {
+            if ((action === 'confirm')) {
+              if (!instance.inputValue) {
+                return
+              }
+              const temp = { ...this.params, [this.promptValueKey]: instance.inputValue }
+              instance.confirmButtonLoading = true
+              instance.confirmButtonText = '执行中...'
+              const result = await post(this.api, temp)
+              // eslint-disable-next-line require-atomic-updates
+              instance.confirmButtonText = '确定'
+              // eslint-disable-next-line require-atomic-updates
+              instance.confirmButtonLoading = false
+              if (!result.success) {
+                this.$message.error(result.message)
+              } else {
+                this.$message.success('操作成功')
+                this.$emit('success')
+              }
+              if (result.success) {
+                done()
+              }
+            } else {
+              done()
+            }
+          }
+        })
+        return
+      }
+      await this.$confirm(this.confirmText, '提示', {
+        type: 'warning',
+        beforeClose: async(action, instance, done) => {
+          if ((action === 'confirm')) {
+            instance.confirmButtonLoading = true
+            instance.confirmButtonText = '执行中...'
+            const result = await post(this.api, this.params)
+            if (!result.success) {
+              this.$message.error(result.message)
+            } else {
+              this.$message.success('操作成功')
+              this.$emit('success')
+            }
+            instance.confirmButtonText = '确定'
+            instance.confirmButtonLoading = false
+            if (result.success) {
+              done()
+            }
+          } else {
+            done()
+          }
         }
-        this.$message.error(result.message)
-        return result.success
       })
     }
   }

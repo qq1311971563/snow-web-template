@@ -1,28 +1,33 @@
 <script>
+import SnowButton from '@/snow-framework/components/SnowButton.vue'
+
 export default {
   name: 'RemoveFeeItem',
+  components: { SnowButton },
   props: {
-    houseId: {
+    id: {
       type: Number,
       default: null
     },
-    feeItemId: {
-      type: Number,
+    name: {
+      type: String,
       default: null
     }
   },
   methods: {
-    remove() {
-      console.log('移除费用')
+    refresh() {
+      this.$emit('success')
     }
   }
 }
 </script>
 
 <template>
-  <el-button type="text" @click="remove">移除</el-button>
+  <snow-button type="text" api="/community-house/remove-fee-item" :params="id" :confirm-text="`确定移除该收费【${name}】项目吗？`" @success="refresh">
+    <span class="delete-button-color">移除</span>
+  </snow-button>
 </template>
 
 <style scoped lang="scss">
-
+@import "~@/snow-framework/main.css";
 </style>

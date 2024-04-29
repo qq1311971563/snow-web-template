@@ -4,14 +4,13 @@ import SnowTable from '@/snow-framework/components/SnowTable.vue'
 import DoPay from '@/views/checkout-counter/main/do-pay.vue'
 import AddTempBill from '@/views/checkout-counter/main/add-temp-bill.vue'
 import OrderPrint from '@/views/checkout-counter/main/order-print.vue'
-import RefundOrder from '@/views/checkout-counter/main/refund-order.vue'
-import OrderDetails from '@/views/checkout-counter/main/order-details.vue'
 import AddFeeItem from '@/views/checkout-counter/main/add-fee-item.vue'
 import RemoveFeeItem from '@/views/checkout-counter/main/remove-fee-item.vue'
+import OrderDetails from '@/views/checkout-counter/main/order-details.vue'
 
 export default {
   name: 'Index',
-  components: { RemoveFeeItem, AddFeeItem, OrderDetails, RefundOrder, OrderPrint, AddTempBill, DoPay, SnowTable, HouseSelect },
+  components: { OrderDetails, RemoveFeeItem, AddFeeItem, OrderPrint, AddTempBill, DoPay, SnowTable, HouseSelect },
   data() {
     return {
       currentHouse: null,
@@ -23,6 +22,9 @@ export default {
         ownerId: null,
         houseId: null
       },
+      houseFeeParam: {
+        houseId: null
+      },
       selectedWaitPayOrders: []
     }
   },
@@ -30,10 +32,12 @@ export default {
     refresh() {
       this.$refs.waitPayTable.refresh()
       this.$refs.historyPayTable.refresh()
+      this.$refs.houseFeeTable.refresh()
     },
     currentHouseChange(house) {
       this.waitPayParams.houseId = house.id
       this.historyPayParams.houseId = house.id
+      this.houseFeeParam.houseId = house.id
       this.refresh()
     }
   }
@@ -53,22 +57,37 @@ export default {
             <el-form-item label="建筑面积">{{ currentHouse && currentHouse.allArea || '\\' }}</el-form-item>
           </el-col>
           <el-col :span="16">
-            <el-form-item label="入住日期">{{ currentHouse && currentHouse.ownerHouse.checkInDate.substring(0, 10) || '\\' }}</el-form-item>
+            <el-form-item label="入住日期">
+              {{ currentHouse && currentHouse.ownerHouse.checkInDate.substring(0, 10) || '\\' }}
+            </el-form-item>
           </el-col>
           <el-col :span="4">
-            <el-form-item label="业主姓名">{{ currentHouse && currentHouse.owner && currentHouse.owner.name || '\\' }}</el-form-item>
+            <el-form-item label="业主姓名">{{
+              currentHouse && currentHouse.owner && currentHouse.owner.name || '\\'
+            }}
+            </el-form-item>
           </el-col>
           <el-col :span="4">
-            <el-form-item label="业主电话">{{ currentHouse && currentHouse.owner && currentHouse.owner.phone || '\\' }}</el-form-item>
+            <el-form-item label="业主电话">{{
+              currentHouse && currentHouse.owner && currentHouse.owner.phone || '\\'
+            }}
+            </el-form-item>
           </el-col>
           <el-col :span="16">
-            <el-form-item label="证件号码">{{ currentHouse && currentHouse.owner && currentHouse.owner.idCard || '\\' }}</el-form-item>
+            <el-form-item label="证件号码">{{
+              currentHouse && currentHouse.owner && currentHouse.owner.idCard || '\\'
+            }}
+            </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <el-tabs>
         <el-tab-pane label="待支付费用">
-          <do-pay :pay-orders="selectedWaitPayOrders" :house-id="currentHouse && currentHouse.id || null" @success="refresh" />
+          <do-pay
+            :pay-orders="selectedWaitPayOrders"
+            :house-id="currentHouse && currentHouse.id || null"
+            @success="refresh"
+          />
           <add-temp-bill />
           <snow-table
             ref="waitPayTable"
@@ -104,27 +123,35 @@ export default {
           >
             <template v-slot:rowAction="{row}">
               <order-print v-if="row.payStatus === 2 && row.refundStatus === 0" :order-id="row.id" />
-              <refund-order />
-              <order-details />
+              <order-details :pay-order-id="row.id" />
             </template>
           </snow-table>
         </el-tab-pane>
-        <el-tab-pane label="缴费信息">
-          <add-fee-item />
-          <el-table :data="currentHouse && currentHouse.houseFeeList || []">
-            <el-table-column label="序号" type="index" />
+        <el-tab-pane label="周期费用信息">
+          <add-fee-item :house-id="currentHouse && currentHouse.id" @success="refresh" />
+          <snow-table
+            ref="houseFeeTable"
+            query-api="/community-house/house-fee-list"
+            :query-params="houseFeeParam"
+            :init-data="false"
+            :page="false"
+          >
             <el-table-column label="费用名称">
               <template v-slot="{row}">
                 <span>{{ row.feeItem.name }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="name" label="费用类型">
-
+            <el-table-column prop="name" label="收费周期">
               <template v-slot="{row}">
-                <span>{{ row.feeItem.type === 1? '周期性收费' :'临时收费' }}</span>
+                <span>{{ ['','按月收费','按季度收费','按年收费'][row.feeItem.feeCycle] }}</span>
               </template>
             </el-table-column>
-            <el-table-column prop="nextDate" label="开始缴费日期">
+            <el-table-column prop="createTime" label="添加日期">
+              <template v-slot="{row}">
+                <span>{{ row.createTime.substring(0, 10) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="beginDate" label="开始缴费日期">
               <template v-slot="{row}">
                 <span>{{ row.beginDate.substring(0, 10) }}</span>
               </template>
@@ -134,12 +161,17 @@ export default {
                 <span>{{ row.nextDate.substring(0, 10) }}</span>
               </template>
             </el-table-column>
-            <el-table-column>
+            <el-table-column prop="expiredDate" label="截止日期">
               <template v-slot="{row}">
-                <remove-fee-item :house-id="row.houseId" :fee-item-id="row.feeId" />
+                <span>{{ row.expiredDate.substring(0, 10) }}</span>
               </template>
             </el-table-column>
-          </el-table>
+            <el-table-column>
+              <template v-slot="{row}">
+                <remove-fee-item :id="row.id" :name="row.feeItem.name" @success="refresh" />
+              </template>
+            </el-table-column>
+          </snow-table>
         </el-tab-pane>
       </el-tabs>
     </div>

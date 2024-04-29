@@ -25,6 +25,12 @@ const snowFrameworkRouter = [
         meta: { title: '部门管理', requireAuth: true }
       },
       {
+        path: 'post-manager',
+        component: () => import('@/snow-framework/page/system/post/index'),
+        name: '岗位管理',
+        meta: { title: '岗位管理', requireAuth: true }
+      },
+      {
         path: 'role-manager',
         component: () => import('@/snow-framework/page/system/role/index'),
         name: '角色管理',
