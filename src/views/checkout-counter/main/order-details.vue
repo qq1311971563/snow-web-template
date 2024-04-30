@@ -37,7 +37,7 @@ export default {
   >
     <snow-table
       ref="table"
-      query-api="/community-payment-bill/page"
+      query-api="/community-payment-bill/get-all-by-house-id"
       :query-params="{size: 10, payOrderId: payOrderId}"
       :page="false"
       :enable-action="true"

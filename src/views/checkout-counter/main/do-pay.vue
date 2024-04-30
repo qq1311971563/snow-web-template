@@ -71,7 +71,7 @@ export default {
 </script>
 
 <template>
-  <snow-dialog-button :dis-confirm="payOrders.length <= 0" :append-to-body="false" button-text="立即支付" :do-confirm="doConfirm" title="收费确认" confirm-text="立即支付">
+  <snow-dialog-button :disabled="!houseId" :dis-confirm="!houseId || payOrders.length <= 0" :append-to-body="false" button-text="立即支付" :do-confirm="doConfirm" title="收费确认" confirm-text="立即支付">
     <el-table :data="payOrders" style="min-height: 400px">
       <el-table-column label="序号" type="index" />
       <el-table-column label="账单名称" prop="name" />

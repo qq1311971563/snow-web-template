@@ -151,16 +151,19 @@ export default {
 <template>
   <div class="view-container">
     <snow-search v-if="inited" :options="componentOptions" :query-fun="onSearch" />
-    <snow-create
-      v-if="inited && createApi"
-      ref="create"
-      :options="componentOptions"
-      :create-api=" typeof createApi === 'string' ? createApi : toCreate"
-      :title="createTitle"
-      :button-text="createButtonText"
-      @success="refresh"
-    />
-    <snow-update v-if="inited && updateApi" v-show="false" ref="update" :options="componentOptions" :update-api="updateApi" @success="refresh" />
+    <div>
+      <snow-create
+        v-if="inited && createApi"
+        ref="create"
+        :options="componentOptions"
+        :create-api=" typeof createApi === 'string' ? createApi : toCreate"
+        :title="createTitle"
+        :button-text="createButtonText"
+        @success="refresh"
+      />
+      <slot />
+      <snow-update v-if="inited && updateApi" v-show="false" ref="update" :options="componentOptions" :update-api="updateApi" @success="refresh" />
+    </div>
     <div v-if="inited" class="content-div">
       <snow-table
         ref="table"

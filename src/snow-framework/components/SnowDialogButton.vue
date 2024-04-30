@@ -46,6 +46,10 @@ export default {
       type: Boolean,
       default: false
     },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
     appendToBody: {
       type: Boolean,
       default: true
@@ -95,7 +99,7 @@ export default {
 
 <template>
   <div style="display: inline-block;margin-left: 10px">
-    <el-button :type="buttonType" :plain="plain" :icon="buttonIcon" :size="buttonSize" @click="toShow">{{ buttonText }}</el-button>
+    <el-button :type="buttonType" :plain="plain" :disabled="disabled" :icon="buttonIcon" :size="buttonSize" @click="toShow">{{ buttonText }}</el-button>
     <el-dialog v-if="visible" v-show="showDialog" :visible.sync="visible" :title="title" :append-to-body="appendToBody" :close-on-click-modal="false">
       <slot />
       <span v-if="showCancel || toConfirm" slot="footer" class="dialog-footer">

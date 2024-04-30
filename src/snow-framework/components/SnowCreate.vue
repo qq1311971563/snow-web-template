@@ -28,6 +28,14 @@ export default {
     title: {
       type: String,
       default: '新增'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    value: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -41,7 +49,7 @@ export default {
   },
   created() {
     this.inited = false
-    this.params = {}
+    this.params = this.value ? Object.assign({}, this.value) : {}
     this.componentOptions.splice(0, this.componentOptions.length)
     for (let i = 0; i < this.options.length; i++) {
       const item = Object.assign({}, this.options[i])
@@ -80,10 +88,12 @@ export default {
         console.warn('表单校验未通过', e)
         return
       }
+      const reqParams = Object.assign({}, this.params, this.value)
+      this.$emit('input', this.params)
       if (typeof this.createApi === 'function') {
-        return await this.createApi.call(this.$parent, this.params)
+        return await this.createApi.call(this.$parent, reqParams, this.params)
       }
-      const result = await post(this.createApi, this.params)
+      const result = await post(this.createApi, reqParams)
       if (!result.success) {
         this.$message.error(result.message)
         return
@@ -112,7 +122,7 @@ export default {
 </script>
 
 <template>
-  <snow-dialog-button :button-text="buttonText" button-type="primary" :title="title" button-icon="el-icon-plus" :plain="true" :do-confirm="toCreate">
+  <snow-dialog-button :disabled="disabled" :button-text="buttonText" button-type="primary" :title="title" button-icon="el-icon-plus" :plain="true" :do-confirm="toCreate">
     <el-form v-if="inited" ref="form" :model="params" label-position="right" :label-width="'100px'" :rules="rules">
       <el-form-item
         v-for="(item, index) in componentOptions"
@@ -134,9 +144,21 @@ export default {
         />
         <el-input v-else-if="item.type === 'textarea'" v-model="params[item.prop]" type="textarea" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 500" show-word-limit />
         <component :is="item.component" v-else-if="item.type === 'component'" v-model="params[item.prop]" />
-        <el-input-number v-else-if="item.type ==='number'" v-model="params[item.prop]" />
+        <el-input-number v-else-if="item.type ==='number'" v-model="params[item.prop]" :min="item.min" :max="item.max" />
         <el-input-number v-else-if="item.type ==='float'" v-model="params[item.prop]" :precision="2" :step="0.05" />
-        <snow-dict v-else-if="item.type === 'dict'" :ref="'dict-' + item.prop" v-model="params[item.prop]" :params="params" :options="item.options" :api="item.api" :label="item.dictLabel" :value="item.dictProp" :placeholder="item.placeholder || '请选择' + item.label" @change="fieldChange(item)" />
+        <snow-dict
+          v-else-if="item.type === 'dict'"
+          :ref="'dict-' + item.prop"
+          v-model="params[item.prop]"
+          :params="item.params || params"
+          :options="item.options"
+          :api="item.api"
+          :label="item.dictLabel"
+          :value="item.dictProp"
+          :placeholder="item.placeholder || '请选择' + item.label"
+          :clearable="item.clearable === undefined ? true : item.clearable"
+          @change="fieldChange(item)"
+        />
         <el-input v-else v-model="params[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 100" show-word-limit />
       </el-form-item>
     </el-form>

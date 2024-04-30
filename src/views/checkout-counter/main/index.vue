@@ -88,7 +88,7 @@ export default {
             :house-id="currentHouse && currentHouse.id || null"
             @success="refresh"
           />
-          <add-temp-bill />
+          <add-temp-bill :house-id="currentHouse && currentHouse.id" />
           <snow-table
             ref="waitPayTable"
             :query-params="waitPayParams"

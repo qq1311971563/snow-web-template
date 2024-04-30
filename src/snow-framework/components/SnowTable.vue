@@ -118,7 +118,11 @@ export default {
         this.pageInfo.page = result.data.page
         this.pageInfo.size = result.data.size || this.pageInfo.size
         this.pageInfo.total = result.data.total
-        this.pageInfo.totalPage = result.data.totalPage || result.data.total / result.data.size
+        this.pageInfo.totalPage = result.data.totalPage || Math.ceil(result.data.total / result.data.size)
+        if (this.pageInfo.page !== 1 && this.pageInfo.page > this.pageInfo.totalPage) {
+          this.pageInfo.page = 1
+          this.refresh()
+        }
       }
     },
     handleSizeChange(val) {
