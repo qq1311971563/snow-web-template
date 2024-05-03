@@ -38,6 +38,10 @@ export default {
       type: String,
       default: '确定'
     },
+    showBefore: {
+      type: Function,
+      default: () => true
+    },
     doConfirm: {
       type: Function,
       default: () => true
@@ -90,8 +94,11 @@ export default {
         this.visible = false
       }
     },
-    toShow() {
-      this.visible = true
+    async toShow() {
+      const result = await this.showBefore.call(this.$parent)
+      if (result === undefined || result) {
+        this.visible = true
+      }
     }
   }
 }

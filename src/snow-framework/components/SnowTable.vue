@@ -34,8 +34,12 @@ export default {
       }
     },
     updateFun: {
-      type: [Function],
+      type: [Function, String],
       default: null
+    },
+    updateButtonText: {
+      type: String,
+      default: '修改'
     },
     deleteApi: {
       type: [String, Function],
@@ -64,6 +68,10 @@ export default {
     minHeight: {
       type: String,
       default: '300px'
+    },
+    rowKey: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -174,6 +182,7 @@ export default {
       :highlight-current-row="checked !== undefined"
       :highlight-selection-row="true"
       :style="{minHeight: minHeight}"
+      :row-key="rowKey"
       @selection-change="handleSelectionChange"
       @current-change="checkedRowChange"
     >
@@ -196,7 +205,7 @@ export default {
           <span v-else-if="item.type === 'dict'">
             {{ dictFind(item, row) }}
           </span>
-          <slot v-else-if="item.type === 'slot'" :name="item.slot" />
+          <slot v-else-if="item.type === 'slot'" :row="row" :name="item.prop || item.slot" />
           <span v-else>
             {{ row[item.prop] ? row[item.prop] : (row[item.prop] === 0 ? '0' : '\\') }}
           </span>
@@ -205,7 +214,7 @@ export default {
       <slot />
       <el-table-column v-if="enableAction || deleteApi || updateFun" label="操作">
         <template v-slot="{row, $index}">
-          <el-button v-if="updateFun" size="small" type="text" @click="toUpdate(row, $index)">更新</el-button>
+          <el-button v-if="updateFun" size="small" type="text" @click="toUpdate(row, $index)">{{ updateButtonText }}</el-button>
           <snow-button
             v-if="deleteApi"
             type="text"

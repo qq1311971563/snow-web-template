@@ -15,25 +15,53 @@ const communityRouters = [
         path: 'community-area-management',
         component: () => import('@/views/community-config/area-management'),
         name: '区域管理',
-        meta: { title: '区域管理', requireAuth: true }
+        meta: {
+          title: '区域管理', requireAuth: true,
+          buttonAuth: [
+            { auth: 'area-create', name: '创建' },
+            { auth: 'area-update', name: '更新' },
+            { auth: 'area-delete', name: '删除' }
+          ]
+        }
       },
       {
         path: 'community-building-management',
         component: () => import('@/views/community-config/building-management'),
         name: '楼栋管理',
-        meta: { title: '楼栋管理', requireAuth: true }
+        meta: {
+          title: '楼栋管理', requireAuth: true,
+          buttonAuth: [
+            { auth: 'building-create', name: '创建' },
+            { auth: 'building-update', name: '更新' },
+            { auth: 'building-delete', name: '删除' }
+          ]
+        }
       },
       {
         path: 'community-house-management',
         component: () => import('@/views/community-config/house-management'),
         name: '房屋管理',
-        meta: { title: '房屋管理', requireAuth: true }
+        meta: {
+          title: '房屋管理', requireAuth: true,
+          buttonAuth: [
+            { auth: 'house-create', name: '创建' },
+            { auth: 'house-update', name: '更新' },
+            { auth: 'house-delete', name: '删除' }
+          ]
+        }
       },
       {
         path: 'community-owner-management',
         component: () => import('@/views/community-config/owner-management'),
         name: '业主管理',
-        meta: { title: '业主管理', requireAuth: true }
+        meta: {
+          title: '业主管理', requireAuth: true,
+          buttonAuth: [
+            { auth: 'house-create', name: '创建' },
+            { auth: 'house-update', name: '更新' },
+            { auth: 'house-delete', name: '删除' }
+          ]
+        }
       }
     ]
   },

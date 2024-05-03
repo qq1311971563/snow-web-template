@@ -4,7 +4,12 @@ class SnowUtils {
   md5(data = '') {
     return CryptoJS.MD5(data).toString().toUpperCase()
   }
-
+  createRegexForMaxValue(maxValue) {
+    const integerPart = maxValue < 10 ? '0?[1-9]' : maxValue < 100 ? '[1-9]|[1-9][0-9]' : '[1-9]|[1-9][0-9]|1[0-9]{2}'
+    const decimalPart = maxValue % 1 === 0 ? '' : `(\\.\\d{1,2})?`
+    // 如果maxValue是整数，不需要小数部分；否则，添加小数部分，最多两位
+    return new RegExp(`^${integerPart}${decimalPart}$`)
+  }
   uuid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = Math.random() * 16 | 0

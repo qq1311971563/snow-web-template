@@ -114,13 +114,26 @@ export default {
           v-if="item.type === 'date'"
           v-model="params[item.prop]"
           value-format="yyyy-MM-dd"
+          :disabled="item.disUpdate === true"
         />
-        <el-input v-else-if="item.type === 'textarea'" v-model="params[item.prop]" type="textarea" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 500" />
-        <component :is="item.component" v-else-if="item.type === 'component'" v-model="params[item.prop]" />
-        <el-input-number v-else-if="item.type ==='number'" v-model="params[item.prop]" />
-        <el-input-number v-else-if="item.type ==='float'" v-model="params[item.prop]" :precision="2" :step="0.05" />
-        <snow-dict v-else-if="item.type === 'dict'" :ref="'dict-' + item.prop" v-model="params[item.prop]" :params="params" :options="item.options" :api="item.api" :label="item.dictLabel" :value="item.dictProp" :placeholder="item.placeholder || '请选择' + item.label" @change="fieldChange(item)" />
-        <el-input v-else v-model="params[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 100" :show-word-limit="true" />
+        <el-input v-else-if="item.type === 'textarea'" v-model="params[item.prop]" :disabled="item.disUpdate === true" type="textarea" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 500" />
+        <component :is="item.component" v-else-if="item.type === 'component'" v-model="params[item.prop]" :disabled="item.disUpdate === true" />
+        <el-input-number v-else-if="item.type ==='number'" v-model="params[item.prop]" :disabled="item.disUpdate === true" />
+        <el-input-number v-else-if="item.type ==='float'" v-model="params[item.prop]" :precision="2" :step="0.05" :disabled="item.disUpdate === true" />
+        <snow-dict
+          v-else-if="item.type === 'dict'"
+          :ref="'dict-' + item.prop"
+          v-model="params[item.prop]"
+          :disabled="item.disUpdate === true"
+          :params="params"
+          :options="item.options"
+          :api="item.api"
+          :label="item.dictLabel"
+          :value="item.dictProp"
+          :placeholder="item.placeholder || '请选择' + item.label"
+          @change="fieldChange(item)"
+        />
+        <el-input v-else v-model="params[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :disabled="item.disUpdate === true" :maxlength="item.maxlength || 100" :show-word-limit="true" />
       </el-form-item>
     </el-form>
   </snow-dialog>

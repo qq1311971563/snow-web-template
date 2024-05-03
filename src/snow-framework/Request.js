@@ -90,7 +90,7 @@ service.interceptors.response.use(response => {
           disableReLoginDialog = true
           setTimeout(() => {
             disableReLoginDialog = false
-          }, 800)
+          }, 10000)
           await store.dispatch('user/logout')
           this.$router.push(`/login?redirect=${this.$route.fullPath}`)
           // location.reload()

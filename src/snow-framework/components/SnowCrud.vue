@@ -57,11 +57,21 @@ export default {
         return ''
       }
     },
+    queryParams: {
+      type: Object,
+      default: () => {
+        return {}
+      }
+    },
     updateApi: {
       type: [String, Function],
       default: () => {
         return ''
       }
+    },
+    updateButtonText: {
+      type: String,
+      default: '修改'
     },
     deleteApi: {
       type: [String, Function],
@@ -80,6 +90,14 @@ export default {
     tableExtra: {
       type: Array,
       default: () => []
+    },
+    initData: {
+      type: Boolean,
+      default: true
+    },
+    rowKey: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -167,14 +185,17 @@ export default {
     <div v-if="inited" class="content-div">
       <snow-table
         ref="table"
+        :row-key="rowKey"
         :page="page"
-        :query-params="searchParams"
+        :query-params="{...searchParams, ...queryParams}"
         :query-api="queryApi"
         :update-fun="updateApi ? toUpdate : ''"
+        :update-button-text="updateButtonText"
         :delete-api="typeof deleteApi === 'string' ? deleteApi : toDelete"
         :options="componentOptions"
         :del-prompt-key="delPromptKey"
         :extra="tableExtra"
+        :init-data="initData"
       >
         <template v-slot:rowAction="{row}">
           <slot name="rowAction" :row="row" />

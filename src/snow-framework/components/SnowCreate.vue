@@ -157,6 +157,7 @@ export default {
           :value="item.dictProp"
           :placeholder="item.placeholder || '请选择' + item.label"
           :clearable="item.clearable === undefined ? true : item.clearable"
+          :tree="item.tree"
           @change="fieldChange(item)"
         />
         <el-input v-else v-model="params[item.prop]" :placeholder="item.placeholder || '请输入' + item.label" :maxlength="item.maxlength || 100" show-word-limit />

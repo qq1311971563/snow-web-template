@@ -48,6 +48,10 @@ export default {
       type: String,
       default: ''
     },
+    inputType: {
+      type: String,
+      default: 'text'
+    },
     promptValueKey: {
       type: String,
       default: null
@@ -73,7 +77,11 @@ export default {
       if (this.prompt) {
         this.$prompt(this.confirmText, '提示', {
           type: 'warning',
+          inputType: this.inputType,
+          inputPattern: this.inputPattern,
+          inputErrorMessage: this.inputErrorMessage,
           inputPlaceholder: this.inputPlaceholder,
+          closeOnClickModal: false,
           beforeClose: async(action, instance, done) => {
             if ((action === 'confirm')) {
               if (!instance.inputValue) {

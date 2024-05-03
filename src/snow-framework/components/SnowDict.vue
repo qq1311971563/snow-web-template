@@ -36,6 +36,14 @@ export default {
     placeholder: {
       type: String,
       default: '请选择'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    tree: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -102,7 +110,20 @@ export default {
 </script>
 
 <template>
-  <el-select v-model="checkValue" :clearable="clearable" :placeholder="placeholder" @change="onChange">
+  <el-cascader
+    v-if="tree"
+    v-model="checkValue"
+    :clearable="clearable"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    :options="componentOptions"
+    :props="{
+      label:label,
+      value:prop
+    }"
+    @change="onChange"
+  />
+  <el-select v-else v-model="checkValue" :clearable="clearable" :placeholder="placeholder" :disabled="disabled" @change="onChange">
     <el-option v-for="item in componentOptions" :key="item[prop]" :label="item[label]" :value="item[prop]" />
   </el-select>
 </template>
